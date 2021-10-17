@@ -19,14 +19,41 @@ func GetUsers(c *gin.Context) {
 	}
 }
 
-func CreateUser(c *gin.Context) {
+func RegisterUser(c *gin.Context) {
+	type RegisterUserResponse struct {
+		Message string `json:"message"`
+		Email   string `json:"email"`
+	}
 	var user Models.User
 	c.BindJSON(&user)
-	err := Models.CreateUser(&user)
+	rows, userError := Models.FindUserByEmail(&user)
+	if rows > 0 {
+		c.String(http.StatusBadRequest, "User already registered")
+		c.Abort()
+	} else {
+		err := Models.CreateUser(&user)
+		if err != nil || userError != nil {
+			c.String(http.StatusInternalServerError, err.Error())
+			c.Abort()
+		} else {
+			ru := RegisterUserResponse{
+				Message: "User Registered Successfully",
+				Email:   user.Email,
+			}
+			c.JSON(http.StatusOK, ru)
+		}
+	}
+
+}
+
+func LoginUser(c *gin.Context) {
+	var user Models.User
+	c.BindJSON(&user)
+	token, err := Models.LoginUser(&user)
 	if err != nil {
 		fmt.Println(err.Error())
-		c.AbortWithStatus(http.StatusNotFound)
+		c.String(http.StatusNotFound, err.Error())
 	} else {
-		c.JSON(http.StatusOK, user)
+		c.JSON(http.StatusOK, token)
 	}
 }
