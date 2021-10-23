@@ -25,7 +25,7 @@ func GetJWT(user *User) (string, error) {
 	claims["user"] = user.Email
 	claims["aud"] = "auth.friskco.com"
 	claims["role"] = user.Role
-	claims["exp"] = time.Now().Add(time.Minute * 1).Unix()
+	claims["exp"] = time.Now().Add(time.Minute * 10).Unix()
 
 	tokenString, err := token.SignedString(mySigningKey)
 
@@ -52,10 +52,11 @@ type User struct {
 	Email    string `json:"email" gorm:"unique"`
 	Password string `json:"password"`
 	Role     string `json:"role" gorm:"default:user"`
+	Drives   []Drive
 }
 
-func GetAllUsers(user *[]User) (err error) {
-	if err = Config.DB.Find(user).Error; err != nil {
+func GetCurrentUser(user *User, userId int) (err error) {
+	if err = Config.DB.Find(&user, userId).Error; err != nil {
 		return err
 	}
 	return nil
@@ -118,7 +119,8 @@ func Authorized() gin.HandlerFunc {
 
 		if err != nil {
 			c.String(http.StatusUnauthorized, err.Error())
-			c.Abort()
+			c.AbortWithStatus(http.StatusUnauthorized)
+			return
 		}
 
 		if token.Valid {
@@ -126,13 +128,13 @@ func Authorized() gin.HandlerFunc {
 			c.Set("userId", claims["ID"])
 			c.Set("role", claims["role"])
 			c.Set("email", claims["email"])
+			c.Next()
 
 		} else {
 			c.String(http.StatusUnauthorized, "Invalid Auth")
 			c.Abort()
+			return
 		}
-
-		c.Next()
 
 	}
 }

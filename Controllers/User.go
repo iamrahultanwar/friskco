@@ -9,9 +9,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func GetUsers(c *gin.Context) {
-	var user []Models.User
-	err := Models.GetAllUsers(&user)
+func GetCurrentUser(c *gin.Context) {
+	var user Models.User
+	userId := c.GetFloat64("userId")
+	err := Models.GetCurrentUser(&user, int(userId))
 	if err != nil {
 		c.AbortWithStatus(http.StatusNotFound)
 	} else {
@@ -50,10 +51,24 @@ func LoginUser(c *gin.Context) {
 	var user Models.User
 	c.BindJSON(&user)
 	token, err := Models.LoginUser(&user)
+	type loginRespose struct {
+		Token   string `json:"token"`
+		Status  bool   `json:"status"`
+		Message string `json:"message"`
+	}
 	if err != nil {
+		res := loginRespose{
+			Status:  false,
+			Message: err.Error(),
+		}
 		fmt.Println(err.Error())
-		c.String(http.StatusNotFound, err.Error())
+		c.JSON(http.StatusNotFound, res)
 	} else {
-		c.JSON(http.StatusOK, token)
+		res := loginRespose{
+			Status:  true,
+			Message: "Login Successful",
+			Token:   token,
+		}
+		c.JSON(http.StatusOK, res)
 	}
 }

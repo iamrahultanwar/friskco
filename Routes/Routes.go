@@ -13,10 +13,16 @@ func SetupRouter() *gin.Engine {
 
 	userGrp := r.Group("/api/user")
 	{
-		userGrp.GET("/", Models.Authorized(), Controllers.GetUsers)
+		userGrp.GET("/me", Models.Authorized(), Controllers.GetCurrentUser)
 		userGrp.POST("/register", Controllers.RegisterUser)
 		userGrp.POST("/login", Controllers.LoginUser)
 
+	}
+
+	driveGrp := r.Group("/api/drive", Models.Authorized())
+	{
+		driveGrp.GET("/", Controllers.GetAllUserDrives)
+		driveGrp.POST("/create", Controllers.CreateUserDrive)
 	}
 
 	return r

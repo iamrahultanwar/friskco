@@ -8,7 +8,7 @@ import (
 
 func main() {
 	Config.ConnectDB()
-	Config.DB.AutoMigrate(&Models.User{})
+	Config.DB.AutoMigrate(&Models.User{}, &Models.Drive{})
 	r := Routes.SetupRouter()
 
 	r.Run()
