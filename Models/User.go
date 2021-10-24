@@ -25,7 +25,7 @@ func GetJWT(user *User) (string, error) {
 	claims["user"] = user.Email
 	claims["aud"] = "auth.friskco.com"
 	claims["role"] = user.Role
-	claims["exp"] = time.Now().Add(time.Minute * 10).Unix()
+	claims["exp"] = time.Now().Add(time.Minute * 100).Unix()
 
 	tokenString, err := token.SignedString(mySigningKey)
 

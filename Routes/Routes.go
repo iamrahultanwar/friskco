@@ -1,6 +1,8 @@
 package Routes
 
 import (
+	"net/http"
+
 	"github.com/iamrahultanwar/friskco/Controllers"
 	"github.com/iamrahultanwar/friskco/Models"
 
@@ -23,6 +25,15 @@ func SetupRouter() *gin.Engine {
 	{
 		driveGrp.GET("/", Controllers.GetAllUserDrives)
 		driveGrp.POST("/create", Controllers.CreateUserDrive)
+		driveGrp.GET("/files/:driveId", Controllers.GetAllUserFiles)
+
+	}
+
+	fileGrp := r.Group("/api/file")
+	{
+		fileGrp.POST("/upload", Controllers.UploadFile)
+		fileGrp.StaticFS("/get/public", http.Dir("public"))
+
 	}
 
 	return r

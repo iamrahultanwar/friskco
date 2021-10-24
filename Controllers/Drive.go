@@ -2,6 +2,7 @@ package Controllers
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/iamrahultanwar/friskco/Models"
@@ -43,4 +44,19 @@ func CreateUserDrive(c *gin.Context) {
 	}
 	c.AbortWithStatusJSON(http.StatusOK, message)
 
+}
+
+func GetAllUserFiles(c *gin.Context) {
+	files := []Models.File{}
+	driveId := c.Param("driveId")
+
+	if x, err := strconv.ParseInt(driveId, 10, 64); err == nil {
+		if err := Models.GetAllDriveFiles(&files, int(x)); err != nil {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"status": false})
+		}
+		c.AbortWithStatusJSON(http.StatusOK, files)
+		return
+	}
+
+	c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"status": false, "message": "Something went wrong"})
 }

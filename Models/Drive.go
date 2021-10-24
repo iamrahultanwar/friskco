@@ -22,3 +22,12 @@ func CreateUserDrive(drive *Drive) error {
 	}
 	return nil
 }
+
+func GetAllDriveFiles(files *[]File, driveId int) error {
+
+	if err := Config.DB.Where("drive_id = ?", driveId).Find(&files).Error; err != nil {
+		return err
+	}
+	return nil
+
+}
